@@ -1,11 +1,15 @@
 from pydantic import BaseModel
+from beanie import Document
+from pydantic import BaseModel
+from typing import Optional
 
 
-class Todo(BaseModel):
+class Todo(Document):
     id: int
     title: str
     desc: str
     category: str
+    owner: str
 
 
 class TodoRequest(BaseModel):

@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path, status
+from fastapi import APIRouter, HTTPException, Path, status, Depends
+from dependencies import get_current_user
 
-from todo import Todo, TodoRequest
+from models.todo import Todo, TodoRequest
 
 
 todo_router = APIRouter()
@@ -17,19 +18,19 @@ async def get_all_todos() -> list[Todo]:
 
 
 @todo_router.post("", status_code=status.HTTP_201_CREATED)
-async def create_new_todo(todo: TodoRequest) -> Todo:
+async def create_new_todo(todo: TodoRequest, user=Depends(get_current_user)) -> Todo:
     global global_id
     global_id += 1
-    new_todo = Todo(id=global_id, title=todo.title, desc=todo.desc, category=todo.category)
+    new_todo = Todo(id=global_id, title=todo.title, desc=todo.desc, category=todo.category, owner=user.username)
     todo_list.append(new_todo)
     return new_todo
 
 
+
+
 @todo_router.get("/{id}")
-async def get_todo_by_id(id: Annotated[int, Path(gt=0, le=1000)]) -> Todo:
-    for todo in todo_list:
-        if todo.id == id:
-            return todo
+async def get_todo_by_id(user=Depends(get_current_user)):
+    return await Todo.find(Todo.owner == user.username).to_list()
 
     raise HTTPException(status_code=404, detail=f"Item with ID={id} is not found.")
 

@@ -6,6 +6,9 @@ source ../.venv/bin/activate  or  . venv/bin/activate
 pip3 install fastapi
 pip3 install uvicorn
 pip3 install pydantic
+pip3 install beanie motor
+pip3 install motor python-jose
+pip3 install 'python-jose[cryptography]'
 uvicorn main:app --reload
 ```
 
