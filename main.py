@@ -9,10 +9,8 @@ from auth_routes import router as auth_router
 
 import asyncio
 
-from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from beanie.operators import Set
 
 from contextlib import asynccontextmanager
 
@@ -22,19 +20,14 @@ from models.todo import Todo
 
 import certifi
 
+from db import init_mongo
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ca = certifi.where()
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
-
-    await init_beanie(
-        database=client.todo_app,
-        document_models=[Food, User, Todo]
-    )
-
-    print("MongoDB connected")
+    client = await init_mongo()
     yield
-    print("Shutting down")
+    client.close()
+
 
 app = FastAPI(title="Todo Items App", version="1.0.0", lifespan=lifespan)
 

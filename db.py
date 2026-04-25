@@ -1,9 +1,24 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
 
-MONGO_URI = "mongodb://localhost:27017"
+from models.user import User
+from models.todo import Todo
+from models.food import Food
 
-client = AsyncIOMotorClient(MONGO_URI)
-db = client["todo_app"]
+async def init_mongo():
+    client = AsyncIOMotorClient(
+        "mongodb+srv://elizabet:password@cs-topicsi.biphwto.mongodb.net/?appName=cs-topicsi"
+    )
 
-users_collection = db["users"]
-todos_collection = db["todos"]
+    db = client["job_app_db"]
+
+    print("✅ Connecting to MongoDB...")
+
+    await init_beanie(
+        database=db,
+        document_models=[User, Food, Todo]
+    )
+
+    print("✅ MongoDB connected and Beanie initialized")
+
+    return client

@@ -5,67 +5,53 @@ from dependencies import get_current_user
 
 from models.todo import Todo, TodoRequest
 
+from beanie import PydanticObjectId
+
 
 todo_router = APIRouter()
 
-todo_list = []
-global_id = 0
 
-
-@todo_router.get("")
-async def get_all_todos() -> list[Todo]:
-    return todo_list
+@todo_router.get("/")
+async def get_all_todos(user=Depends(get_current_user)):
+    return await Todo.find(Todo.owner == user.username).to_list()
 
 
 @todo_router.post("", status_code=status.HTTP_201_CREATED)
-async def create_new_todo(todo: TodoRequest, user=Depends(get_current_user)) -> Todo:
-    global global_id
-    global_id += 1
-    new_todo = Todo(id=global_id, title=todo.title, desc=todo.desc, category=todo.category, owner=user.username)
-    todo_list.append(new_todo)
+async def create_new_todo(todo: TodoRequest, user=Depends(get_current_user)):
+    new_todo = Todo(
+        title=todo.title, desc=todo.desc, category=todo.category, owner=user.username)
+    await new_todo.insert()
     return new_todo
 
+@todo_router.get("/{todo_id}")
+async def get_todo_by_id(todo_id: PydanticObjectId, user=Depends(get_current_user)):
+    todo = await Todo.get(todo_id)
+
+    if not todo or todo.owner != user.username:
+        raise HTTPException(status_code=404, detail=f"Item not found.")
+    return todo
 
 
+@todo_router.delete("/{todo_id}")
+async def delete_todo_by_id(todo_id:PydanticObjectId, user=Depends(get_current_user)):
+    todo = await Todo.get(todo_id)
 
-@todo_router.get("/{id}")
-async def get_todo_by_id(user=Depends(get_current_user)):
-    return await Todo.find(Todo.owner == user.username).to_list()
+    if not todo or todo.owner != user.username:
+        raise HTTPException(status_code=404, detail=f"Item not found.")
+    
+    await todo.delete()
+    return {"message": "Deleted successfully."}
 
-    raise HTTPException(status_code=404, detail=f"Item with ID={id} is not found.")
+@todo_router.put("/{todo_id}")
+async def update_todo_by_id(todo_id: PydanticObjectId, todo_data: TodoRequest, user=Depends(get_current_user)):
+    todo = await Todo.get(todo_id)
 
+    if not todo or todo.owner != user.username:
+        raise HTTPException(status_code=404, detail=f"Item not found.")
+    
+    todo.title = todo_data.title
+    todo.desc = todo_data.desc
+    todo.category = todo_data.category
 
-@todo_router.delete("/{id}")
-async def delete_todo_by_id(
-    id: Annotated[
-        int,
-        Path(
-            gt=0,
-            le=1000,
-            title="This is the ID for the desired Todo Item to be deleted",
-        ),
-    ],
-) -> dict:
-    for i in range(len(todo_list)):
-        todo = todo_list[i]
-        if todo.id == id:
-            todo_list.pop(i)
-            return {"msg": f"The todo with ID={id} is deleted."}
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Item with ID={id} is not found."
-    )
-
-@todo_router.put("/{id}")
-async def update_todo_by_id(
-    id: Annotated[int, Path(gt=0, le=1000)],
-    todo: TodoRequest
-) -> Todo:
-    for t in todo_list:
-        if t.id == id:
-            t.title = todo.title
-            t.desc = todo.desc
-            t.category = todo.category
-            return t
-
-    raise HTTPException(status_code=404, detail=f"Item with ID={id} not found.")
+    await todo.save()
+    return todo

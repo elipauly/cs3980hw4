@@ -12,7 +12,7 @@ class Todo(Document):
     owner: str
 
 
-class TodoRequest(BaseModel):
+class TodoRequest(Document):
     title: str
     desc: str
     category: str
