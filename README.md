@@ -17,6 +17,8 @@ Add, display, update, and remove the contents of my kitchen so I can visually tr
 
 Built from the CRUD midterm todo app base with FastAPI.
 
+It's not the most intuitive UI, but it is functional with handling authentication, password encryption, routing, CRUD functions, and connecting to MongoDB.
+
 ```bash
 pip3 freeze > requirements.txt
 ```
@@ -25,4 +27,32 @@ pip3 freeze > requirements.txt
 ## Screenshots
 **Main Page**
 
-![Screenshot1](screenshots/basepage.png)
+![Screenshot1](screenshots/begin_app.png)
+
+**Add info for user account**
+
+![Screenshot2](screenshots/signupentry.png)
+
+**Sign up success**
+
+![Screenshot2](screenshots/signupsuccess.png)
+
+**Adding items**
+
+![Screenshot2](screenshots/additems.png)
+
+**Adding items**
+
+![Screenshot2](screenshots/edit_items.png)
+
+**Changes after updating items**
+
+![Screenshot2](screenshots/afterediteditems.png)
+
+**Changes after deleting items**
+
+![Screenshot2](screenshots/afterdelete.png)
+
+**Items cleared after user logs out**
+
+![Screenshot2](screenshots/logout.png)
