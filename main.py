@@ -1,12 +1,11 @@
-from typing import Annotated
-
-from fastapi import APIRouter, FastAPI, HTTPException, Path
-from fastapi.responses import FileResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
-from todo_routes import todo_router
+from routes.fridge_routes import fridge_router
+from routes.auth_routes import auth_router
 
-app = FastAPI(title="Todo Items App", version="1.0.0")
+app = FastAPI(title="Fridge App")
 
 
 @app.get("/")
@@ -14,8 +13,7 @@ async def home():
     return FileResponse("./frontend/index.html")
 
 
-app.include_router(todo_router, tags=["Todos"], prefix="/todos")
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(fridge_router, prefix="/fridge", tags=["Fridge"])
 
-# the router needs to be before the mount.
-# otherwise, the routes cannot be found.
 app.mount("/", StaticFiles(directory="frontend"), name="static")
