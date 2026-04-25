@@ -22,7 +22,9 @@ It's not the most intuitive UI, but it is functional with handling authenticatio
 ```bash
 pip3 freeze > requirements.txt
 ```
-
+```bash
+uvicorn main:app --reload
+```
 ---
 ## Screenshots
 **Main Page**
